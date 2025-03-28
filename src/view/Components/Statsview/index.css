@@ -1,0 +1,124 @@
+/* 多邻国风格的状态视图 CSS */
+:root {
+  --duolingo-green: #58cc02;
+  --duolingo-blue: #1cb0f6;
+  --duolingo-orange: #ff9600;
+  --duolingo-purple: #ce82ff;
+  --duolingo-red: #ff4b4b;
+  --duolingo-background: #fff;
+  --duolingo-text: #333;
+  --duolingo-light-gray: #f2f2f2;
+  --duolingo-border-radius: 16px;
+  --duolingo-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.duolingo-statsview {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background-color: var(--duolingo-background);
+  border-radius: var(--duolingo-border-radius);
+  box-shadow: var(--duolingo-shadow);
+  margin-bottom: 16px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+.duolingo-stat {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  font-weight: 600;
+}
+
+.duolingo-stat:hover {
+  background-color: var(--duolingo-light-gray);
+  transform: translateY(-2px);
+}
+
+.duolingo-stat-icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-right: 8px;
+  height: 32px;
+  width: 32px;
+}
+
+.duolingo-stat-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.duolingo-stat-label {
+  font-size: 12px;
+  color: #777;
+  margin-bottom: 2px;
+}
+
+.duolingo-stat-value {
+  font-size: 18px;
+  color: var(--duolingo-text);
+}
+
+/* HP 样式 */
+.duolingo-stat.hp {
+  color: var(--duolingo-red);
+}
+
+/* Level 样式 */
+.duolingo-stat.level {
+  color: var(--duolingo-blue);
+}
+
+/* Gold 样式 */
+.duolingo-stat.gold {
+  color: var(--duolingo-orange);
+}
+
+/* 响应式设计 */
+@media (max-width: 600px) {
+  .duolingo-statsview {
+    padding: 10px;
+  }
+  
+  .duolingo-stat {
+    padding: 6px 8px;
+  }
+  
+  .duolingo-stat-icon {
+    height: 28px;
+    width: 28px;
+    margin-right: 6px;
+  }
+  
+  .duolingo-stat-value {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 400px) {
+  .duolingo-statsview {
+    padding: 8px;
+  }
+  
+  .duolingo-stat {
+    padding: 4px 6px;
+  }
+  
+  .duolingo-stat-icon {
+    height: 24px;
+    width: 24px;
+    margin-right: 4px;
+  }
+  
+  .duolingo-stat-label {
+    font-size: 10px;
+  }
+  
+  .duolingo-stat-value {
+    font-size: 14px;
+  }
+}

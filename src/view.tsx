@@ -19,7 +19,7 @@ export class HabiticaSyncView extends ItemView {
     }
 
     getDisplayText() {
-        return "Habitica Pane"
+        return this.plugin.i18n.t("view.title")
     }
     getIcon(): string {
         return "popup-open"

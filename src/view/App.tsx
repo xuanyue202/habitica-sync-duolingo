@@ -56,8 +56,8 @@ class App extends React.Component<any, any> {
         if (cronDate.getDate() != now.getDate() || (cronDate.getMonth() != now.getMonth() || cronDate.getFullYear() != now.getFullYear())) {
             return (
                 <div className="cron">
-                    <div id="cronMessage"> Welcome back! Please check your tasks for the last day and hit continue to get your daily rewards.</div>
-                    <button id="cronButton" onClick={this.runCron}>Continue</button>
+                    <div id="cronMessage">{this.props.plugin.i18n.t("view.cronMessage")}</div>
+                    <button id="cronButton" onClick={this.runCron}>{this.props.plugin.i18n.t("view.cronButton")}</button>
                 </div>
             );
         }
@@ -74,7 +74,7 @@ class App extends React.Component<any, any> {
             })
         } catch (error) {
             console.log(error);
-            new Notice("There was an error running the cron. Please try again later.");
+            new Notice(this.props.plugin.i18n.t("notices.syncFailed"));
         }
         this.reloadData();
     }
@@ -83,7 +83,7 @@ class App extends React.Component<any, any> {
             let response = await getStats(this.username, this.credentials);
             let result = await response.json();
             if (result.success === false) {
-                new Notice('Login Failed, Please check credentials and try again!');
+                new Notice(this.props.plugin.i18n.t("notices.loginFailed"));
             }
             else {
                 this.setState({
@@ -94,7 +94,7 @@ class App extends React.Component<any, any> {
             }
         } catch (e) {
             console.log(e);
-            new Notice("API Error: Please check credentials")
+            new Notice(this.props.plugin.i18n.t("notices.apiError"))
         }
     }
     componentDidMount() {
@@ -103,121 +103,214 @@ class App extends React.Component<any, any> {
 
     async sendScore(id: string, score: string, message: string) {
         try {
+            if (!id || !score) {
+                console.error("Invalid parameters:", {id, score});
+                new Notice(this.props.plugin.i18n.t("notices.invalidTask"));
+                return;
+            }
+            
             let response = await scoreTask(this.username, this.credentials, id, score);
             let result = await response.json();
             if (result.success === true) {
                 new Notice(message);
                 this.reloadData();
             } else {
-                new Notice("Resyncing, please try again");
+                console.error("API error:", result);
+                new Notice(this.props.plugin.i18n.t("notices.syncFailed"));
                 this.reloadData();
             }
         } catch (e) {
-            console.log(e);
-            new Notice("API Error: Please check credentials")
+            console.error("sendScore error:", e);
+            new Notice(this.props.plugin.i18n.t("notices.apiError"))
         }
     }
 
     async sendReward(id: string, score: string, message: string) {
         try {
+            if (!id || !score) {
+                console.error("Invalid parameters:", {id, score});
+                new Notice(this.props.plugin.i18n.t("notices.invalidTask"));
+                return;
+            }
+            
             let response = await costReward(this.username, this.credentials, id, score);
             let result = await response.json();
             if (result.success === true) {
                 new Notice(message);
                 this.reloadData();
             } else {
-                new Notice("Resyncing, please try again");
+                console.error("API error:", result);
+                new Notice(this.props.plugin.i18n.t("notices.syncFailed"));
                 this.reloadData();
             }
         } catch (e) {
-            console.log(e);
-            new Notice("API Error: Please check credentials")
+            console.error("sendReward error:", e);
+            new Notice(this.props.plugin.i18n.t("notices.apiError"))
         }
     }
 
     handleChangeTodos(event: any) {
+        if (event && event.stopPropagation) {
+            event.stopPropagation();
+        }
+        if (event && event.preventDefault) {
+            event.preventDefault();
+        }
+
+        if (!event || !event.target || !event.target.id) {
+            console.error("Invalid event object in handleChangeTodos:", event);
+            new Notice(this.props.plugin.i18n.t("notices.taskChangeError"));
+            return;
+        }
+
+        console.log("Todo change event:", event.target.id);
+        
+        if (!this.state.tasks || !this.state.tasks.todos) {
+            console.error("Tasks data not available");
+            new Notice(this.props.plugin.i18n.t("notices.taskDataUnavailable"));
+            return;
+        }
+
+        let taskFound = false;
         this.state.tasks.todos.forEach((element: any) => {
-            if (element.id == event.target.id) {
+            if (element.id === event.target.id) {
+                taskFound = true;
                 if (!element.completed) {
-                    this.sendScore(event.target.id, "up", "Checked!")
+                    console.log("Marking todo as completed:", element.id, element.text);
+                    this.sendScore(event.target.id, "up", this.props.plugin.i18n.t("notices.taskCompleted"));
                 } else {
-                    this.sendScore(event.target.id, "down", "Un-Checked!")
+                    console.log("Marking todo as incomplete:", element.id, element.text);
+                    this.sendScore(event.target.id, "down", this.props.plugin.i18n.t("notices.taskUncompleted"));
                 }
             }
-        })
+        });
+
+        if (!taskFound) {
+            console.error("Task not found:", event.target.id);
+            new Notice(this.props.plugin.i18n.t("notices.taskNotFound"));
+        }
     }
+    
     handleChangeDailys(event: any) {
+        if (event && event.stopPropagation) {
+            event.stopPropagation();
+        }
+        if (event && event.preventDefault) {
+            event.preventDefault();
+        }
+
         this.state.tasks.dailys.forEach((element: any) => {
-            if (element.id == event.target.id) {
-                if (element.id == event.target.id) {
-                    if (!element.completed) {
-                        this.sendScore(event.target.id, "up", "Checked!")
-                    } else {
-                        this.sendScore(event.target.id, "down", "Un-Checked!")
-                    }
+            if (element.id === event.target.id) {
+                if (!element.completed) {
+                    this.sendScore(event.target.id, "up", this.props.plugin.i18n.t("notices.taskChecked"));
+                } else {
+                    this.sendScore(event.target.id, "down", this.props.plugin.i18n.t("notices.taskUnChecked"));
                 }
             }
         })
     }
+    
     handleChangeHabits(event: any) {
+        if (event && event.stopPropagation) {
+            event.stopPropagation();
+        }
+        if (event && event.preventDefault) {
+            event.preventDefault();
+        }
+
         const target_id = event.target.id.slice(4)
-        if (event.target.id.slice(0, 4) == "plus") {
+        if (event.target.id.slice(0, 4) === "plus") {
             this.state.tasks.habits.forEach((element: any) => {
-                if (element.id == target_id) {
-                    this.sendScore(target_id, "up", "Plus!")
+                if (element.id === target_id) {
+                    this.sendScore(target_id, "up", this.props.plugin.i18n.t("notices.taskPlus"));
                 }
             })
         }
         else {
             this.state.tasks.habits.forEach((element: any) => {
-                if (element.id == target_id) {
-                    this.sendScore(target_id, "down", "Minus :(")
+                if (element.id === target_id) {
+                    this.sendScore(target_id, "down", this.props.plugin.i18n.t("notices.taskMinus"));
                 }
             })
         }
     }
+    
     handleChangeRewards(event: any) {
+        if (event && event.stopPropagation) {
+            event.stopPropagation();
+        }
+        if (event && event.preventDefault) {
+            event.preventDefault();
+        }
+
         const target_id = event.target.id
         this.state.tasks.rewards.forEach((element: any) => {
-            if (element.id == event.target.id) {
-                if (element.id == target_id) {
-                    this.sendReward(target_id, "down", "Redeemed!")
-                }
+            if (element.id === target_id) {
+                this.sendReward(target_id, "down", this.props.plugin.i18n.t("notices.taskRedeemed"));
             }
         })
     }
+    
     async handleChangeChecklistItem(event: any){
-        let parentID = event.target.parentNode.parentNode.parentNode.getAttribute("id")
-        let targetID = event.target.id
-        console.log(parentID+ " , " + targetID)
-        try{
+        if (event && event.stopPropagation) {
+            event.stopPropagation();
+        }
+        if (event && event.preventDefault) {
+            event.preventDefault();
+        }
+
+        try {
+            let parentID = event.target && event.target.parentNode && 
+                         event.target.parentNode.parentNode && 
+                         event.target.parentNode.parentNode.parentNode &&
+                         event.target.parentNode.parentNode.parentNode.getAttribute("id");
+            
+            let targetID = event.target && event.target.id;
+            
+            if (!parentID || !targetID) {
+                console.error("Missing parentID or targetID", {parentID, targetID});
+                new Notice(this.props.plugin.i18n.t("notices.taskItemIdentificationError"));
+                return;
+            }
+            
+            console.log(parentID+ " , " + targetID);
+            
             let response = await scoreChecklistItem(this.username, this.credentials, targetID, parentID);
             let result = await response.json();
             if (result.success === true) {
-                new Notice("Checked!");
+                new Notice(this.props.plugin.i18n.t("notices.taskChecked"));
                 this.reloadData();
             } else {
-                new Notice("Resyncing, please try again");
+                console.error("API error:", result);
+                new Notice(this.props.plugin.i18n.t("notices.syncFailed"));
                 this.reloadData();
             }
         } catch (e) {
-            console.log(e);
-            new Notice("API Error: Please check credentials")
+            console.error("handleChangeChecklistItem error:", e);
+            new Notice(this.props.plugin.i18n.t("notices.apiError"))
         }
     }
 
     render() {
         let content = this.CheckCron(this.state.user_data.lastCron);
         if (this.state.error)
-            return (<div className="loading">Loading....</div>)
+            return (<div className="loading">{this.props.plugin.i18n.t("view.loading")}</div>)
         else if (!this.state.isLoaded)
-            return <div className="loading">Loading....</div>
+            return <div className="loading">{this.props.plugin.i18n.t("view.loading")}</div>
         else {
             return (<div className="plugin-root">
                 {content}
-                <Statsview className ="stats-view" user_data={this.state.user_data} />
+                <Statsview className="stats-view" user_data={this.state.user_data} plugin={this.props.plugin} />
                 <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
-                <Taskview data={this.state.tasks} handleChangeTodos={this.handleChangeTodos} settings = {this.props.plugin.settings} handleChangeDailys={this.handleChangeDailys} handleChangeHabits={this.handleChangeHabits} handleChangeRewards={this.handleChangeRewards} handleChangeChecklistItem={this.handleChangeChecklistItem}/>
+                <Taskview data={this.state.tasks} 
+                    handleChangeTodos={this.handleChangeTodos} 
+                    settings={this.props.plugin.settings} 
+                    handleChangeDailys={this.handleChangeDailys} 
+                    handleChangeHabits={this.handleChangeHabits} 
+                    handleChangeRewards={this.handleChangeRewards} 
+                    handleChangeChecklistItem={this.handleChangeChecklistItem}
+                    plugin={this.props.plugin}
+                />
                 
             </div>
             );

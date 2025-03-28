@@ -1,4 +1,24 @@
-# Habitica Sync in Obsidian
+# Habitica Sync Duolingo in Obsidian
+
+## What's New
+This fork enhances the original Habitica Sync plugin with the following improvements:
+
+1. **Duolingo-style UI**: Refreshed interface with a cleaner, more modern design inspired by Duolingo
+2. **Multilingual Support**: Added support for both English and Chinese
+   
+   - English interface:  
+   
+   <img src="snapshot/todo_en.png" alt="English Todo Interface" width="300px" />
+  
+   - Chinese interface:  
+   
+   <img src="snapshot/dailytask_zh.png" alt="Chinese Daily Tasks Interface" width="300px" />
+3. **Bug Fixes**: Fixed various issues to improve stability and performance
+
+*Special thanks to the original author [LeoAndRan](https://ko-fi.com/leonardandran) for creating this amazing plugin!*
+
+---
+
 This plugin for Obsidian incorporates a view to display and interact with the task management app Habitica.
 
 Please open issues for any bugs/functionality requests :)
